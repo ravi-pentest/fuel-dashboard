@@ -88,21 +88,19 @@
 </div>
 
 <script>
-    // 1. ඔබේ GOOGLE APPS SCRIPT URL එක මෙතැනට ඇතුළත් කරන්න
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxALZdR5xWwLecGFAGXOtrHmL17wnY_b5eBEsvEgFSZ2PptNLTYZc5ePB6T4UYL4pbLog/exec';
     let masterData = [];
 
-    // 2. පිටුව විවෘත වන විටම "fual status" ශීට් එකේ දත්ත ලබා ගැනීම
     async function loadMasterData() {
         try {
             const response = await fetch(`${scriptURL}?type=dropdown`);
             masterData = await response.json();
+            console.log("දත්ත සාර්ථකව ලැබුණා:", masterData);
         } catch (error) {
-            console.error("Error loading stations:", error);
+            console.error("දත්ත ලබා ගැනීමේ ගැටලුවක්:", error);
         }
     }
 
-    // 3. පළාත අනුව පොලිස් වසම් Filter කිරීම
     function updatePoliceStations() {
         const province = document.getElementById('province').value;
         const policeSelect = document.getElementById('police');
@@ -111,26 +109,46 @@
         policeSelect.innerHTML = '<option value="">තෝරන්න...</option>';
         stationSelect.innerHTML = '<option value="">වසම තෝරා සිටින්න...</option>';
 
-        const filteredPolice = [...new Set(masterData.filter(d => d.province === province).map(d => d.police))];
-        filteredPolice.sort().forEach(p => {
-            policeSelect.innerHTML += `<option value="${p}">${p}</option>`;
-        });
+        if (!province) return;
+
+        // පළාත අනුව පොලිස් වසම් Filter කිරීම
+        const filteredPolice = [...new Set(
+            masterData
+            .filter(d => d.province.toString().trim() === province.trim())
+            .map(d => d.police.toString().trim())
+        )];
+
+        if (filteredPolice.length === 0) {
+            policeSelect.innerHTML = '<option value="">දත්ත හමු නොවීය</option>';
+        } else {
+            filteredPolice.sort().forEach(p => {
+                policeSelect.innerHTML += `<option value="${p}">${p}</option>`;
+            });
+        }
     }
 
-    // 4. වසම අනුව ෂෙඩ් ලැයිස්තුව Filter කිරීම
     function updateSheds() {
         const police = document.getElementById('police').value;
         const stationSelect = document.getElementById('station');
         
         stationSelect.innerHTML = '<option value="">තෝරන්න...</option>';
 
-        const filteredSheds = masterData.filter(d => d.police === police).map(d => d.shedName);
-        filteredSheds.sort().forEach(s => {
-            stationSelect.innerHTML += `<option value="${s}">${s}</option>`;
-        });
+        if (!police) return;
+
+        // පොලිස් වසම අනුව ෂෙඩ් Filter කිරීම
+        const filteredSheds = masterData
+            .filter(d => d.police.toString().trim() === police.trim())
+            .map(d => d.shedName.toString().trim());
+
+        if (filteredSheds.length === 0) {
+            stationSelect.innerHTML = '<option value="">දත්ත හමු නොවීය</option>';
+        } else {
+            filteredSheds.sort().forEach(s => {
+                stationSelect.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+        }
     }
 
-    // 5. දත්ත Submit කිරීම
     document.getElementById('fuelForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -164,7 +182,6 @@
             });
     });
 
-    // ආරම්භයේදී දත්ත පූරණය කිරීම
     loadMasterData();
 </script>
 
