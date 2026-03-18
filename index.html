@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Status Dashboard - Sri Lanka</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', sans-serif; }
+        .card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 15px; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: #0d6efd; }
+        .status-on { color: #2ecc71; font-weight: bold; }
+        .status-off { color: #e74c3c; font-weight: bold; }
+        .header-section { padding: 40px 0; text-align: center; background: linear-gradient(45deg, #0d6efd, #000); border-bottom: 2px solid #333; }
+    </style>
+</head>
+<body>
+
+<div class="header-section mb-5">
+    <h1>සජීවී ඉන්ධන තත්ත්ව පුවරුව</h1>
+    <p class="lead">දිවයින පුරා පිරවුම්හල්වල තොරතුරු සාරාංශය</p>
+</div>
+
+<div class="container">
+    <div class="row text-center mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card p-4">
+                <h5>පෙට්‍රල් ඇති ස්ථාන</h5>
+                <h2 id="petrol-count" class="status-on">--</h2>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-4">
+                <h5>ඩීසල් ඇති ස්ථාන</h5>
+                <h2 id="diesel-count" class="status-on">--</h2>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-4">
+                <h5>පෝලිමේ ඇති වාහන</h5>
+                <h2 id="total-queue" class="text-warning">--</h2>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-4">
+                <h5>ක්‍රියාකාරී නිලධාරීන්</h5>
+                <h2 id="police-count" class="text-info">--</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h4 class="mb-4">සවිස්තරාත්මක වාර්තාව</h4>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>පළාත</th>
+                        <th>පොලිස් වසම</th>
+                        <th>පිරවුම්හල</th>
+                        <th>පෙට්‍රල්</th>
+                        <th>ඩීසල්</th>
+                        <th>පෝලිම (වාහන)</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body">
+                    <tr><td colspan="6" class="text-center">දත්ත පූරණය වෙමින් පවතී...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center mt-5 mb-3 text-secondary">
+    <small>Last Updated: <span id="last-update">--</span></small>
+</footer>
+
+</body>
+</html>
