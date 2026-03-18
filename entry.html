@@ -21,22 +21,22 @@
 <div class="container">
     <div class="form-container">
         <h2 class="text-center text-white mb-4">ඉන්ධන තොරතුරු ඇතුළත් කරන්න</h2>
-        <hr border-color="#30363d">
+        <hr style="border-color: #30363d;">
         
         <form id="fuelForm">
             <div class="mb-3">
                 <label class="form-label">පළාත (Province)</label>
                 <select id="province" class="form-select" required onchange="updatePoliceStations()">
                     <option value="">පළාත තෝරන්න...</option>
-                    <option value="Western">Western (බස්නාහිර)</option>
-                    <option value="Central">Central (මධ්‍යම)</option>
-                    <option value="Southern">Southern (දකුණු)</option>
-                    <option value="North Western">North Western (වයඹ)</option>
-                    <option value="Sabaragamuwa">Sabaragamuwa (සබරගමුව)</option>
-                    <option value="Eastern">Eastern (නැගෙනහිර)</option>
-                    <option value="Uva">Uva (ඌව)</option>
-                    <option value="North Central">North Central (උතුරු මැද)</option>
-                    <option value="Northern">Northern (උතුරු)</option>
+                    <option value="බස්නාහිර">බස්නාහිර (Western)</option>
+                    <option value="මධ්‍යම">මධ්‍යම (Central)</option>
+                    <option value="දකුණ">දකුණ (Southern)</option>
+                    <option value="වයඹ">වයඹ (North Western)</option>
+                    <option value="සබරගමුව">සබරගමුව (Sabaragamuwa)</option>
+                    <option value="නැගෙනහිර">නැගෙනහිර (Eastern)</option>
+                    <option value="ඌව">ඌව (Uva)</option>
+                    <option value="උතුරු මැද">උතුරු මැද (North Central)</option>
+                    <option value="උතුර">උතුර (Northern)</option>
                 </select>
             </div>
 
@@ -88,19 +88,22 @@
 </div>
 
 <script>
+    // ඔබේ නවතම Web App URL එක මෙතැනට ඇතුළත් කරන්න
     const scriptURL = 'https://script.google.com/macros/s/AKfycbybIFVLZTnyksOhRvtql4WcuL5-DRH9cuuBzt71LPDl6NexVfugzmInUAneXdADgalp8Q/exec';
     let masterData = [];
 
+    // පිටුව විවෘත වන විටම Dropdown දත්ත ලබා ගැනීම
     async function loadMasterData() {
         try {
             const response = await fetch(`${scriptURL}?type=dropdown`);
             masterData = await response.json();
-            console.log("දත්ත සාර්ථකව ලැබුණා:", masterData);
+            console.log("දත්ත පූරණය විය:", masterData);
         } catch (error) {
             console.error("දත්ත ලබා ගැනීමේ ගැටලුවක්:", error);
         }
     }
 
+    // පළාත අනුව පොලිස් වසම් පෙරීම
     function updatePoliceStations() {
         const province = document.getElementById('province').value;
         const policeSelect = document.getElementById('police');
@@ -111,10 +114,10 @@
 
         if (!province) return;
 
-        // පළාත අනුව පොලිස් වසම් Filter කිරීම
+        // පළාත ගැලපෙන පොලිස් ස්ථාන ලැයිස්තුව ලබා ගැනීම
         const filteredPolice = [...new Set(
             masterData
-            .filter(d => d.province.toString().trim() === province.trim())
+            .filter(d => d.province && d.province.toString().trim() === province.trim())
             .map(d => d.police.toString().trim())
         )];
 
@@ -127,6 +130,7 @@
         }
     }
 
+    // පොලිස් වසම අනුව පිරවුම්හල් පෙරීම
     function updateSheds() {
         const police = document.getElementById('police').value;
         const stationSelect = document.getElementById('station');
@@ -135,9 +139,8 @@
 
         if (!police) return;
 
-        // පොලිස් වසම අනුව ෂෙඩ් Filter කිරීම
         const filteredSheds = masterData
-            .filter(d => d.police.toString().trim() === police.trim())
+            .filter(d => d.police && d.police.toString().trim() === police.trim())
             .map(d => d.shedName.toString().trim());
 
         if (filteredSheds.length === 0) {
@@ -149,6 +152,7 @@
         }
     }
 
+    // දත්ත Submit කිරීම
     document.getElementById('fuelForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -174,6 +178,9 @@
                 message.innerHTML = '<div class="alert alert-success">දත්ත සාර්ථකව ඇතුළත් කළා!</div>';
                 document.getElementById('fuelForm').reset();
                 submitBtn.disabled = false;
+                // Dropdowns මුල සිට සැකසීම
+                document.getElementById('police').innerHTML = '<option value="">පළාත තෝරා සිටින්න...</option>';
+                document.getElementById('station').innerHTML = '<option value="">වසම තෝරා සිටින්න...</option>';
             })
             .catch(err => {
                 loader.style.display = 'none';
@@ -182,6 +189,7 @@
             });
     });
 
+    // ආරම්භයේදී දත්ත පූරණය කරන්න
     loadMasterData();
 </script>
 
