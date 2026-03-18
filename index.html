@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ඉන්ධන තත්ත්ව පුවරුව | Fuel Status SL</title>
+    <title>සජීවී ඉන්ධන තත්ත්ව පුවරුව | Fuel Status SL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -11,46 +11,45 @@
             --card-bg: #161b22;
             --text-main: #c9d1d9;
             --accent-blue: #58a6ff;
-            --success-green: #238636;
-            --danger-red: #da3633;
+            --success-green: #3fb950;
+            --danger-red: #f85149;
+            --warning-orange: #d29922;
         }
         body { 
             background-color: var(--bg-color); 
             color: var(--text-main); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
             padding-bottom: 50px;
         }
         .header-section {
             background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
-            padding: 40px 0;
+            padding: 30px 0;
             text-align: center;
             border-bottom: 1px solid #30363d;
         }
         .card {
             background-color: var(--card-bg);
             border: 1px solid #30363d;
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text-main);
+            transition: transform 0.2s;
         }
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-        .status-available { color: #3fb950; }
-        .status-unavailable { color: #f85149; }
+        .card:hover { transform: translateY(-3px); }
+        .stat-value { font-size: 1.8rem; font-weight: bold; }
+        .stat-label { font-size: 0.85rem; color: #8b949e; }
+        
+        .status-available { color: var(--success-green); }
+        .status-unavailable { color: var(--danger-red); }
+        
         .table { color: var(--text-main); border-color: #30363d; }
         .table thead { background-color: #21262d; }
+        
         #searchInput {
             background-color: #0d1117;
             color: white;
             border: 1px solid #30363d;
         }
-        #searchInput:focus {
-            border-color: var(--accent-blue);
-            box-shadow: none;
-        }
-        .badge-pill { border-radius: 50px; padding: 5px 15px; font-size: 0.8rem; }
+        .badge-pill { border-radius: 50px; padding: 4px 12px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -58,138 +57,159 @@
 <div class="header-section mb-4">
     <h1 class="fw-bold text-white">සජීවී ඉන්ධන තත්ත්ව පුවරුව</h1>
     <p class="text-secondary">පොලිස් ඒකක මගින් තත්‍ය කාලීනව යාවත්කාලීන කරනු ලබයි</p>
-    <div id="loader" class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
+    <div id="loader" class="spinner-border text-primary" role="status"></div>
 </div>
 
-<div class="container">
-    <div class="row g-3 text-center mb-4">
-        <div class="col-md-3">
-            <div class="card p-3">
-                <small class="text-secondary">පෙට්‍රල් ඇති ස්ථාන</small>
-                <div id="petrol-count" class="stat-value status-available">0</div>
+<div class="container-fluid px-4">
+    <div class="row g-2 mb-4">
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card p-2 text-center border-success">
+                <div class="stat-label">පෙට්‍රල් ඇති</div>
+                <div id="p-available" class="stat-value status-available">0</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card p-3">
-                <small class="text-secondary">ඩීසල් ඇති ස්ථාන</small>
-                <div id="diesel-count" class="stat-value status-available">0</div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card p-2 text-center border-danger">
+                <div class="stat-label">පෙට්‍රල් නැති</div>
+                <div id="p-unavailable" class="stat-value status-unavailable">0</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card p-3">
-                <small class="text-secondary">මුළු පෝලිම් (වාහන)</small>
-                <div id="total-queue" class="stat-value text-warning">0</div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card p-2 text-center border-success">
+                <div class="stat-label">ඩීසල් ඇති</div>
+                <div id="d-available" class="stat-value status-available">0</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card p-3">
-                <small class="text-secondary">ක්‍රියාකාරී පොලිස් වසම්</small>
-                <div id="police-count" class="stat-value text-info">0</div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card p-2 text-center border-danger">
+                <div class="stat-label">ඩීසල් නැති</div>
+                <div id="d-unavailable" class="stat-value status-unavailable">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card p-2 text-center border-primary">
+                <div class="stat-label">QR සහිත</div>
+                <div id="qr-count" class="stat-value text-primary">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="card p-2 text-center border-warning">
+                <div class="stat-label">වසා ඇති හල්</div>
+                <div id="closed-count" class="stat-value text-warning">0</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2 mx-auto">
+            <div class="card p-2 text-center" style="border: 1px solid #ff7b72;">
+                <div class="stat-label">පොලිසිය නොමැති</div>
+                <div id="no-police" class="stat-value" style="color: #ff7b72;">0</div>
             </div>
         </div>
     </div>
 
     <div class="card p-4">
         <div class="row mb-3 align-items-center">
-            <div class="col-md-6">
-                <h4 class="m-0">පිරවුම්හල් දත්ත ලැයිස්තුව</h4>
+            <div class="col-md-8">
+                <h4 class="m-0">පිරවුම්හල් දත්ත සවිස්තරාත්මක ලැයිස්තුව</h4>
             </div>
-            <div class="col-md-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="වසම හෝ පිරවුම්හල සොයන්න...">
+            <div class="col-md-4 text-end">
+                <input type="text" id="searchInput" class="form-control" placeholder="සොයන්න (වසම, පලාත, හල)...">
             </div>
         </div>
         
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" style="font-size: 0.9rem;">
                 <thead>
                     <tr>
-                        <th>පළාත</th>
-                        <th>පොලිස් වසම</th>
+                        <th>පළාත/වසම</th>
                         <th>පිරවුම්හල</th>
                         <th>පෙට්‍රල්</th>
                         <th>ඩීසල්</th>
-                        <th>පෝලිම (වාහන)</th>
+                        <th>QR</th>
+                        <th>පෝලිම</th>
                         <th>තත්ත්වය</th>
+                        <th>වේලාව</th>
                     </tr>
                 </thead>
-                <tbody id="data-table-body">
-                    </tbody>
+                <tbody id="data-table-body"></tbody>
             </table>
         </div>
     </div>
 
-    <div class="text-center mt-4">
-        <small class="text-secondary">අවසන් වරට යාවත්කාලීන වූයේ: <span id="last-update">--</span></small>
+    <div class="text-center mt-4 text-secondary">
+        <small>අවසන් යාවත්කාලීනය: <span id="last-update">--</span></small>
     </div>
 </div>
 
 <script>
-    // ඔබේ GOOGLE APPS SCRIPT WEB APP URL එක මෙතැනට ඇතුළත් කරන්න
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxALZdR5xWwLecGFAGXOtrHmL17wnY_b5eBEsvEgFSZ2PptNLTYZc5ePB6T4UYL4pbLog/exec';
-
-    async function fetchData() {
+    function fetchData() {
         document.getElementById('loader').style.display = 'inline-block';
-        try {
-            const response = await fetch(scriptURL);
-            const data = await response.json();
+        google.script.run.withSuccessHandler(function(jsonString) {
+            const data = JSON.parse(jsonString);
             renderDashboard(data);
-        } catch (error) {
-            console.error('දත්ත ලබා ගැනීමේ දෝෂයක්:', error);
-        } finally {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
-        }
+        }).getDashboardData();
     }
 
     function renderDashboard(data) {
         const tableBody = document.getElementById('data-table-body');
-        let petrolCount = 0, dieselCount = 0, totalQueue = 0;
+        let stats = {
+            p_on: 0, p_off: 0, d_on: 0, d_off: 0, 
+            qr: 0, closed: 0, no_pol: 0
+        };
         
         tableBody.innerHTML = '';
 
         data.forEach(row => {
-            // ගණනය කිරීම්
-            if (row.petrol === 'ඇත') petrolCount++;
-            if (row.diesel === 'ඇත') dieselCount++;
-            const queueNum = (parseInt(row.p_queue) || 0) + (parseInt(row.d_queue) || 0);
-            totalQueue += queueNum;
+            // Stats Calculation
+            if (row.petrol === 'ඇත') stats.p_on++; else stats.p_off++;
+            if (row.diesel === 'ඇත') stats.d_on++; else stats.d_off++;
+            if (row.qr === 'ඔව්') stats.qr++;
+            if (row.closed === 'ඔව්') stats.closed++;
+            if (row.officers === 'නැත') stats.no_pol++;
 
-            // වගුවට පේළියක් එක් කිරීම
             const tr = document.createElement('tr');
+            if(row.closed === 'ඔව්') tr.style.opacity = "0.6";
+
             tr.innerHTML = `
-                <td>${row.province}</td>
-                <td><span class="badge bg-secondary badge-pill">${row.police}</span></td>
+                <td>
+                    <div class="fw-bold">${row.province}</div>
+                    <div class="small text-secondary">${row.police}</div>
+                </td>
                 <td>${row.station}</td>
                 <td class="${row.petrol === 'ඇත' ? 'status-available' : 'status-unavailable'} fw-bold">${row.petrol}</td>
-                <td class="${row.diesel === 'ඇt' ? 'status-available' : 'status-unavailable'} fw-bold">${row.diesel}</td>
-                <td>${queueNum}</td>
-                <td><small class="text-info">${row.officers === 'ඔව්' ? '👮 නිලධාරීන් සිටී' : 'නිලධාරීන් නැත'}</small></td>
+                <td class="${row.diesel === 'ඇත' ? 'status-available' : 'status-unavailable'} fw-bold">${row.diesel}</td>
+                <td><span class="badge ${row.qr === 'ඔව්' ? 'bg-primary' : 'bg-secondary'}">${row.qr}</span></td>
+                <td class="text-warning fw-bold">${(parseInt(row.p_queue)||0) + (parseInt(row.d_queue)||0)}</td>
+                <td>
+                    <div class="small">
+                        ${row.closed === 'ඔව්' ? '🔴 වසා ඇත' : '🟢 විවෘතයි'}<br>
+                        ${row.officers === 'ඔව්' ? '👮 නිලධාරීන් සිටී' : '<span style="color:#ff7b72">⚠️ නිලධාරීන් නැත</span>'}
+                    </div>
+                </td>
+                <td class="small text-secondary">${row.time}</td>
             `;
             tableBody.appendChild(tr);
         });
 
-        // සාරාංශ පුවරු යාවත්කාලීන කිරීම
-        document.getElementById('petrol-count').innerText = petrolCount;
-        document.getElementById('diesel-count').innerText = dieselCount;
-        document.getElementById('total-queue').innerText = totalQueue;
-        document.getElementById('police-count').innerText = data.length;
+        // Update Summary Cards
+        document.getElementById('p-available').innerText = stats.p_on;
+        document.getElementById('p-unavailable').innerText = stats.p_off;
+        document.getElementById('d-available').innerText = stats.d_on;
+        document.getElementById('d-unavailable').innerText = stats.d_off;
+        document.getElementById('qr-count').innerText = stats.qr;
+        document.getElementById('closed-count').innerText = stats.closed;
+        document.getElementById('no-police').innerText = stats.no_pol;
     }
 
-    // සෙවීමේ පහසුකම
     document.getElementById('searchInput').addEventListener('keyup', function() {
-        const value = this.value.toLowerCase();
+        const val = this.value.toLowerCase();
         const rows = document.querySelectorAll('#data-table-body tr');
-        rows.forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
-        });
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(val) ? '' : 'none');
     });
 
-    // ආරම්භයේදී දත්ත ලබා ගැනීම සහ සෑම තත්පර 30කට වරක් අලුත් කිරීම
-    fetchData();
+    window.onload = fetchData;
     setInterval(fetchData, 30000);
 </script>
-
 </body>
 </html>
