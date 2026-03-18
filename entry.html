@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>දත්ත ඇතුළත් කිරීම | Fuel Reporting</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; }
+        .form-container { max-width: 600px; margin: 50px auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
+        .btn-submit { width: 100%; background-color: #238636; border: none; padding: 12px; font-weight: bold; }
+        .btn-submit:hover { background-color: #2ea043; }
+        .form-control, .form-select { background-color: #0d1117; border: 1px solid #30363d; color: white; }
+        .form-control:focus, .form-select:focus { background-color: #0d1117; color: white; border-color: #58a6ff; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container">
+        <h3 class="text-center mb-4 text-white">ඉන්ධන තොරතුරු ඇතුළත් කිරීම</h3>
+        <form id="fuelForm">
+            <div class="mb-3">
+                <label class="form-label">පළාත</label>
+                <select id="province" class="form-select" required onchange="updatePoliceStations()">
+                    <option value="">පළාත තෝරන්න...</option>
+                    <option value="Western">Western (බස්නාහිර)</option>
+                    <option value="Central">Central (මධ්‍යම)</option>
+                    <option value="Southern">Southern (දකුණු)</option>
+                    </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">පොලිස් වසම</label>
+                <select id="police" class="form-select" required>
+                    <option value="">පළාත තෝරා සිටින්න...</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">පිරවුම්හල</label>
+                <input type="text" id="station" class="form-control" placeholder="නම ඇතුළත් කරන්න" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="form-label">පෙට්‍රල් තත්ත්වය</label>
+                    <select id="petrol" class="form-select">
+                        <option value="ඇත">ඇත</option>
+                        <option value="නැත">නැත</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label class="form-label">ඩීසල් තත්ත්වය</label>
+                    <select id="diesel" class="form-select">
+                        <option value="ඇත">ඇත</option>
+                        <option value="නැත">නැත</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">මුළු පෝලිම (දළ වාහන ගණන)</label>
+                <input type="number" id="queue" class="form-control" value="0">
+            </div>
+
+            <button type="submit" class="btn btn-success btn-submit">දත්ත ඉදිරිපත් කරන්න (Submit)</button>
+        </form>
+        <div id="msg" class="mt-3 text-center"></div>
+    </div>
+</div>
+
+<script>
+    // ඔබේ Google Apps Script URL එක මෙතැනට දමන්න
+    const scriptURL = 'ඔබේ_WEB_APP_URL_එක_මෙතැනට_දමන්න';
+
+    // පළාත අනුව පොලිස් වසම් වෙනස් කිරීම (Sample)
+    const policeData = {
+        "Western": ["Colombo", "Gampaha", "Kalutara"],
+        "Central": ["Kandy", "Matale", "Nuwara Eliya"],
+        "Southern": ["Galle", "Matara", "Hambantota"]
+    };
+
+    function updatePoliceStations() {
+        const province = document.getElementById('province').value;
+        const policeSelect = document.getElementById('police');
+        policeSelect.innerHTML = '<option value="">තෝරන්න...</option>';
+        
+        if(policeData[province]) {
+            policeData[province].forEach(st => {
+                policeSelect.innerHTML += `<option value="${st}">${st}</option>`;
+            });
+        }
+    }
+
+    document.getElementById('fuelForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const msg = document.getElementById('msg');
+        msg.innerHTML = "යවමින් පවතී...";
+
+        const formData = new FormData();
+        formData.append('province', document.getElementById('province').value);
+        formData.append('police', document.getElementById('police').value);
+        formData.append('station', document.getElementById('station').value);
+        formData.append('petrol', document.getElementById('petrol').value);
+        formData.append('diesel', document.getElementById('diesel').value);
+        formData.append('queue', document.getElementById('queue').value);
+
+        fetch(scriptURL, { method: 'POST', body: formData})
+            .then(response => {
+                msg.innerHTML = "<span class='text-success'>සාර්ථකව ඇතුළත් කළා!</span>";
+                document.getElementById('fuelForm').reset();
+            })
+            .catch(error => msg.innerHTML = "<span class='text-danger'>දෝෂයක් සිදු විය!</span>");
+    });
+</script>
+</body>
+</html>
