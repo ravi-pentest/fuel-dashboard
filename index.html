@@ -3,56 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Status Dashboard - Sri Lanka</title>
+    <title>ඉන්ධන තත්ත්ව පුවරුව | Fuel Status SL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', sans-serif; }
-        .card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 15px; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); border-color: #0d6efd; }
-        .status-on { color: #2ecc71; font-weight: bold; }
-        .status-off { color: #e74c3c; font-weight: bold; }
-        .header-section { padding: 40px 0; text-align: center; background: linear-gradient(45deg, #0d6efd, #000); border-bottom: 2px solid #333; }
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-main: #c9d1d9;
+            --accent-blue: #58a6ff;
+            --success-green: #238636;
+            --danger-red: #da3633;
+        }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+        .header-section {
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            padding: 40px 0;
+            text-align: center;
+            border-bottom: 1px solid #30363d;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            color: var(--text-main);
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .status-available { color: #3fb950; }
+        .status-unavailable { color: #f85149; }
+        .table { color: var(--text-main); border-color: #30363d; }
+        .table thead { background-color: #21262d; }
+        #searchInput {
+            background-color: #0d1117;
+            color: white;
+            border: 1px solid #30363d;
+        }
+        #searchInput:focus {
+            border-color: var(--accent-blue);
+            box-shadow: none;
+        }
+        .badge-pill { border-radius: 50px; padding: 5px 15px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div class="header-section mb-5">
-    <h1>සජීවී ඉන්ධන තත්ත්ව පුවරුව</h1>
-    <p class="lead">දිවයින පුරා පිරවුම්හල්වල තොරතුරු සාරාංශය</p>
+<div class="header-section mb-4">
+    <h1 class="fw-bold text-white">සජීවී ඉන්ධන තත්ත්ව පුවරුව</h1>
+    <p class="text-secondary">පොලිස් ඒකක මගින් තත්‍ය කාලීනව යාවත්කාලීන කරනු ලබයි</p>
+    <div id="loader" class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 </div>
 
 <div class="container">
-    <div class="row text-center mb-5">
-        <div class="col-md-3 mb-3">
-            <div class="card p-4">
-                <h5>පෙට්‍රල් ඇති ස්ථාන</h5>
-                <h2 id="petrol-count" class="status-on">--</h2>
+    <div class="row g-3 text-center mb-4">
+        <div class="col-md-3">
+            <div class="card p-3">
+                <small class="text-secondary">පෙට්‍රල් ඇති ස්ථාන</small>
+                <div id="petrol-count" class="stat-value status-available">0</div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card p-4">
-                <h5>ඩීසල් ඇති ස්ථාන</h5>
-                <h2 id="diesel-count" class="status-on">--</h2>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <small class="text-secondary">ඩීසල් ඇති ස්ථාන</small>
+                <div id="diesel-count" class="stat-value status-available">0</div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card p-4">
-                <h5>පෝලිමේ ඇති වාහන</h5>
-                <h2 id="total-queue" class="text-warning">--</h2>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <small class="text-secondary">මුළු පෝලිම් (වාහන)</small>
+                <div id="total-queue" class="stat-value text-warning">0</div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card p-4">
-                <h5>ක්‍රියාකාරී නිලධාරීන්</h5>
-                <h2 id="police-count" class="text-info">--</h2>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <small class="text-secondary">ක්‍රියාකාරී පොලිස් වසම්</small>
+                <div id="police-count" class="stat-value text-info">0</div>
             </div>
         </div>
     </div>
 
     <div class="card p-4">
-        <h4 class="mb-4">සවිස්තරාත්මක වාර්තාව</h4>
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-6">
+                <h4 class="m-0">පිරවුම්හල් දත්ත ලැයිස්තුව</h4>
+            </div>
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control" placeholder="වසම හෝ පිරවුම්හල සොයන්න...">
+            </div>
+        </div>
+        
         <div class="table-responsive">
-            <table class="table table-dark table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>පළාත</th>
@@ -61,19 +111,85 @@
                         <th>පෙට්‍රල්</th>
                         <th>ඩීසල්</th>
                         <th>පෝලිම (වාහන)</th>
+                        <th>තත්ත්වය</th>
                     </tr>
                 </thead>
                 <tbody id="data-table-body">
-                    <tr><td colspan="6" class="text-center">දත්ත පූරණය වෙමින් පවතී...</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
+
+    <div class="text-center mt-4">
+        <small class="text-secondary">අවසන් වරට යාවත්කාලීන වූයේ: <span id="last-update">--</span></small>
+    </div>
 </div>
 
-<footer class="text-center mt-5 mb-3 text-secondary">
-    <small>Last Updated: <span id="last-update">--</span></small>
-</footer>
+<script>
+    // ඔබේ GOOGLE APPS SCRIPT WEB APP URL එක මෙතැනට ඇතුළත් කරන්න
+    const scriptURL = 'ඔබේ_WEB_APP_URL_එක_මෙතැනට_දමන්න';
+
+    async function fetchData() {
+        document.getElementById('loader').style.display = 'inline-block';
+        try {
+            const response = await fetch(scriptURL);
+            const data = await response.json();
+            renderDashboard(data);
+        } catch (error) {
+            console.error('දත්ත ලබා ගැනීමේ දෝෂයක්:', error);
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
+        }
+    }
+
+    function renderDashboard(data) {
+        const tableBody = document.getElementById('data-table-body');
+        let petrolCount = 0, dieselCount = 0, totalQueue = 0;
+        
+        tableBody.innerHTML = '';
+
+        data.forEach(row => {
+            // ගණනය කිරීම්
+            if (row.petrol === 'ඇත') petrolCount++;
+            if (row.diesel === 'ඇත') dieselCount++;
+            const queueNum = (parseInt(row.p_queue) || 0) + (parseInt(row.d_queue) || 0);
+            totalQueue += queueNum;
+
+            // වගුවට පේළියක් එක් කිරීම
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.province}</td>
+                <td><span class="badge bg-secondary badge-pill">${row.police}</span></td>
+                <td>${row.station}</td>
+                <td class="${row.petrol === 'ඇත' ? 'status-available' : 'status-unavailable'} fw-bold">${row.petrol}</td>
+                <td class="${row.diesel === 'ඇt' ? 'status-available' : 'status-unavailable'} fw-bold">${row.diesel}</td>
+                <td>${queueNum}</td>
+                <td><small class="text-info">${row.officers === 'ඔව්' ? '👮 නිලධාරීන් සිටී' : 'නිලධාරීන් නැත'}</small></td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        // සාරාංශ පුවරු යාවත්කාලීන කිරීම
+        document.getElementById('petrol-count').innerText = petrolCount;
+        document.getElementById('diesel-count').innerText = dieselCount;
+        document.getElementById('total-queue').innerText = totalQueue;
+        document.getElementById('police-count').innerText = data.length;
+    }
+
+    // සෙවීමේ පහසුකම
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const value = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#data-table-body tr');
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+        });
+    });
+
+    // ආරම්භයේදී දත්ත ලබා ගැනීම සහ සෑම තත්පර 30කට වරක් අලුත් කිරීම
+    fetchData();
+    setInterval(fetchData, 30000);
+</script>
 
 </body>
 </html>
