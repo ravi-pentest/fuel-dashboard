@@ -14,13 +14,14 @@
         .btn-submit { width: 100%; padding: 15px; font-weight: bold; font-size: 1.1rem; background-color: #238636; border: none; margin-top: 20px; transition: 0.3s; }
         .btn-submit:hover { background-color: #2ea043; transform: scale(1.02); }
         .loading-overlay { display: none; text-align: center; margin-top: 10px; }
+        .alert { border-radius: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="form-container">
-        <h2 class="text-center text-white mb-4">ඉන්ධන තොරතුරු ඇතුළත් කරන්න</h2>
+        <h2 class="text-center text-white mb-4">ඉන්ධන තොරතුරු ඇතුළත් කිරීම</h2>
         <hr style="border-color: #30363d;">
         
         <form id="fuelForm">
@@ -28,15 +29,15 @@
                 <label class="form-label">පළාත (Province)</label>
                 <select id="province" class="form-select" required onchange="updatePoliceStations()">
                     <option value="">පළාත තෝරන්න...</option>
-                    <option value="බස්නාහිර">බස්නාහිර (Western)</option>
-                    <option value="මධ්‍යම">මධ්‍යම (Central)</option>
-                    <option value="දකුණ">දකුණ (Southern)</option>
-                    <option value="වයඹ">වයඹ (North Western)</option>
-                    <option value="සබරගමුව">සබරගමුව (Sabaragamuwa)</option>
-                    <option value="නැගෙනහිර">නැගෙනහිර (Eastern)</option>
-                    <option value="ඌව">ඌව (Uva)</option>
-                    <option value="උතුරු මැද">උතුරු මැද (North Central)</option>
-                    <option value="උතුර">උතුර (Northern)</option>
+                    <option value="බස්නාහිර">බස්නාහිර</option>
+                    <option value="මධ්‍යම">මධ්‍යම</option>
+                    <option value="දකුණ">දකුණ</option>
+                    <option value="වයඹ">වයඹ</option>
+                    <option value="සබරගමුව">සබරගමුව</option>
+                    <option value="නැගෙනහිර">නැගෙනහිර</option>
+                    <option value="ඌව">ඌව</option>
+                    <option value="උතුරු මැද">උතුරු මැද</option>
+                    <option value="උතුර">උතුර</option>
                 </select>
             </div>
 
@@ -88,24 +89,27 @@
 </div>
 
 <script>
-    // ඔබේ නවතම Web App URL එක මෙතැනට ඇතුළත් කරන්න
+    // ඔබේ අලුත්ම Web App URL එක මෙතැනට ඇතුළත් කරන්න
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzA2ma7X8WO2-aUI6wGxW1FP1KYz3E_q1EK3IjMg7qLJOVxt91vBPBBcckHY_zzBIaQ4w/exec';
     let masterData = [];
 
-    // පිටුව විවෘත වන විටම Dropdown දත්ත ලබා ගැනීම
+    // මුලින්ම දත්ත පූරණය කිරීම
     async function loadMasterData() {
+        const messageDiv = document.getElementById('message');
+        messageDiv.innerHTML = '<span class="text-info">මූලික දත්ත පූරණය වෙමින් පවතී...</span>';
         try {
             const response = await fetch(`${scriptURL}?type=dropdown`);
             masterData = await response.json();
-            console.log("දත්ත පූරණය විය:", masterData);
+            messageDiv.innerHTML = '';
+            console.log("Master data loaded successfully.");
         } catch (error) {
-            console.error("දත්ත ලබා ගැනීමේ ගැටලුවක්:", error);
+            console.error("Data loading error:", error);
+            messageDiv.innerHTML = '<div class="alert alert-danger">දත්ත පූරණය කිරීමේ දෝෂයක්. කරුණාකර Refresh කරන්න.</div>';
         }
     }
 
-    // පළාත අනුව පොලිස් වසම් පෙරීම
     function updatePoliceStations() {
-        const province = document.getElementById('province').value;
+        const province = document.getElementById('province').value.trim();
         const policeSelect = document.getElementById('police');
         const stationSelect = document.getElementById('station');
         
@@ -114,10 +118,10 @@
 
         if (!province) return;
 
-        // පළාත ගැලපෙන පොලිස් ස්ථාන ලැයිස්තුව ලබා ගැනීම
+        // පළාත අනුව Filter කිරීම (Trim භාවිතා කර අමතර හිස්තැන් ඉවත් කරයි)
         const filteredPolice = [...new Set(
             masterData
-            .filter(d => d.province && d.province.toString().trim() === province.trim())
+            .filter(d => d.province && d.province.toString().trim() === province)
             .map(d => d.police.toString().trim())
         )];
 
@@ -130,9 +134,8 @@
         }
     }
 
-    // පොලිස් වසම අනුව පිරවුම්හල් පෙරීම
     function updateSheds() {
-        const police = document.getElementById('police').value;
+        const police = document.getElementById('police').value.trim();
         const stationSelect = document.getElementById('station');
         
         stationSelect.innerHTML = '<option value="">තෝරන්න...</option>';
@@ -140,7 +143,7 @@
         if (!police) return;
 
         const filteredSheds = masterData
-            .filter(d => d.police && d.police.toString().trim() === police.trim())
+            .filter(d => d.police && d.police.toString().trim() === police)
             .map(d => d.shedName.toString().trim());
 
         if (filteredSheds.length === 0) {
@@ -152,7 +155,6 @@
         }
     }
 
-    // දත්ත Submit කිරීම
     document.getElementById('fuelForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -175,10 +177,10 @@
         fetch(scriptURL, { method: 'POST', body: formData })
             .then(res => {
                 loader.style.display = 'none';
-                message.innerHTML = '<div class="alert alert-success">දත්ත සාර්ථකව ඇතුළත් කළා!</div>';
+                message.innerHTML = '<div class="alert alert-success">දත්ත සාර්ථකව ගබඩා කළා!</div>';
                 document.getElementById('fuelForm').reset();
                 submitBtn.disabled = false;
-                // Dropdowns මුල සිට සැකසීම
+                // Dropdowns reset කිරීම
                 document.getElementById('police').innerHTML = '<option value="">පළාත තෝරා සිටින්න...</option>';
                 document.getElementById('station').innerHTML = '<option value="">වසම තෝරා සිටින්න...</option>';
             })
@@ -189,7 +191,6 @@
             });
     });
 
-    // ආරම්භයේදී දත්ත පූරණය කරන්න
     loadMasterData();
 </script>
 
